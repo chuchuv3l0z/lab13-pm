@@ -3,8 +3,8 @@ package com.example.lab13
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -19,22 +19,35 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MaterialTheme {
-                Ejercicio2ColorAnimation()
+                Ejercicio3SizeAndPosition()
             }
         }
     }
 }
 
 @Composable
-fun Ejercicio2ColorAnimation() {
+fun Ejercicio3SizeAndPosition() {
 
-    var isBlue by remember { mutableStateOf(true) }
+    var isMoved by remember { mutableStateOf(false) }
 
-    // Animación del color
-    val animatedColor by animateColorAsState(
-        targetValue = if (isBlue) Color(0xFF2196F3) else Color(0xFFE91E63),
-        animationSpec = tween(durationMillis = 600),
-        label = "colorAnimation"
+    // Tamaño animado
+    val boxSize by animateDpAsState(
+        targetValue = if (isMoved) 180.dp else 100.dp,
+        animationSpec = spring(dampingRatio = 0.7f),
+        label = "boxSize"
+    )
+
+    // Posición animada
+    val offsetX by animateDpAsState(
+        targetValue = if (isMoved) 80.dp else 0.dp,
+        animationSpec = spring(dampingRatio = 0.7f),
+        label = "offsetX"
+    )
+
+    val offsetY by animateDpAsState(
+        targetValue = if (isMoved) 120.dp else 0.dp,
+        animationSpec = spring(dampingRatio = 0.7f),
+        label = "offsetY"
     )
 
     Column(
@@ -45,18 +58,17 @@ fun Ejercicio2ColorAnimation() {
         verticalArrangement = Arrangement.Center
     ) {
 
-        // Botón para cambiar el color
-        Button(onClick = { isBlue = !isBlue }) {
-            Text("Cambiar color")
+        Button(onClick = { isMoved = !isMoved }) {
+            Text(if (isMoved) "Volver a posición inicial" else "Mover y agrandar cuadro")
         }
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Cuadro que cambia de color suavemente
         Box(
             modifier = Modifier
-                .size(150.dp)
-                .background(animatedColor)
+                .offset(x = offsetX, y = offsetY) // posición
+                .size(boxSize)                    // tamaño
+                .background(Color(0xFFFF5722))    // naranja
         )
     }
 }
