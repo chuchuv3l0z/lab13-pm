@@ -3,52 +3,42 @@ package com.example.lab13
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.foundation.background
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.Color
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             MaterialTheme {
-                Ejercicio3SizeAndPosition()
+                Ejercicio4AnimatedContent()
             }
         }
     }
 }
 
+enum class PantallaEstado {
+    CARGANDO,
+    CONTENIDO,
+    ERROR
+}
+
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun Ejercicio3SizeAndPosition() {
+fun Ejercicio4AnimatedContent() {
 
-    var isMoved by remember { mutableStateOf(false) }
-
-    // Tamaño animado
-    val boxSize by animateDpAsState(
-        targetValue = if (isMoved) 180.dp else 100.dp,
-        animationSpec = spring(dampingRatio = 0.7f),
-        label = "boxSize"
-    )
-
-    // Posición animada
-    val offsetX by animateDpAsState(
-        targetValue = if (isMoved) 80.dp else 0.dp,
-        animationSpec = spring(dampingRatio = 0.7f),
-        label = "offsetX"
-    )
-
-    val offsetY by animateDpAsState(
-        targetValue = if (isMoved) 120.dp else 0.dp,
-        animationSpec = spring(dampingRatio = 0.7f),
-        label = "offsetY"
-    )
+    var estadoActual by remember { mutableStateOf(PantallaEstado.CARGANDO) }
 
     Column(
         modifier = Modifier
@@ -58,17 +48,68 @@ fun Ejercicio3SizeAndPosition() {
         verticalArrangement = Arrangement.Center
     ) {
 
-        Button(onClick = { isMoved = !isMoved }) {
-            Text(if (isMoved) "Volver a posición inicial" else "Mover y agrandar cuadro")
+        Text(
+            text = "Ejercicio 4: AnimatedContent",
+            style = MaterialTheme.typography.titleMedium
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Botones para cambiar de estado
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Button(onClick = { estadoActual = PantallaEstado.CARGANDO }) {
+                Text("Cargando")
+            }
+            Button(onClick = { estadoActual = PantallaEstado.CONTENIDO }) {
+                Text("Contenido")
+            }
+            Button(
+                onClick = { estadoActual = PantallaEstado.ERROR },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFD32F2F)
+                )
+            ) {
+                Text("Error")
+            }
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(32.dp))
 
-        Box(
-            modifier = Modifier
-                .offset(x = offsetX, y = offsetY) // posición
-                .size(boxSize)                    // tamaño
-                .background(Color(0xFFFF5722))    // naranja
-        )
+        // Cambio de contenido con animación
+        AnimatedContent(
+            targetState = estadoActual,
+            transitionSpec = {
+                fadeIn(animationSpec = tween(400)) togetherWith
+                        fadeOut(animationSpec = tween(400))
+            },
+            label = "estadoPantalla"
+        ) { estado ->
+
+            when (estado) {
+                PantallaEstado.CARGANDO -> {
+                    Text(
+                        text = "Cargando información…",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+
+                PantallaEstado.CONTENIDO -> {
+                    Text(
+                        text = "Contenido cargado correctamente.",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+
+                PantallaEstado.ERROR -> {
+                    Text(
+                        text = "Ocurrió un error, intenta nuevamente.",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Color(0xFFD32F2F)
+                    )
+                }
+            }
+        }
     }
 }
