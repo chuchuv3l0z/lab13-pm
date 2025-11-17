@@ -3,9 +3,8 @@ package com.example.lab13
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -20,16 +19,23 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MaterialTheme {
-                Ejercicio1AnimatedVisibility()
+                Ejercicio2ColorAnimation()
             }
         }
     }
 }
 
 @Composable
-fun Ejercicio1AnimatedVisibility() {
+fun Ejercicio2ColorAnimation() {
 
-    var isVisible by remember { mutableStateOf(false) }
+    var isBlue by remember { mutableStateOf(true) }
+
+    // Animación del color
+    val animatedColor by animateColorAsState(
+        targetValue = if (isBlue) Color(0xFF2196F3) else Color(0xFFE91E63),
+        animationSpec = tween(durationMillis = 600),
+        label = "colorAnimation"
+    )
 
     Column(
         modifier = Modifier
@@ -39,24 +45,18 @@ fun Ejercicio1AnimatedVisibility() {
         verticalArrangement = Arrangement.Center
     ) {
 
-        // Botón para alternar visibilidad
-        Button(onClick = { isVisible = !isVisible }) {
-            Text(if (isVisible) "Ocultar cuadro" else "Mostrar cuadro")
+        // Botón para cambiar el color
+        Button(onClick = { isBlue = !isBlue }) {
+            Text("Cambiar color")
         }
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Animación de visibilidad
-        AnimatedVisibility(
-            visible = isVisible,
-            enter = fadeIn(),
-            exit = fadeOut()
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(150.dp)
-                    .background(Color(0xFF4CAF50)) // verde
-            )
-        }
+        // Cuadro que cambia de color suavemente
+        Box(
+            modifier = Modifier
+                .size(150.dp)
+                .background(animatedColor)
+        )
     }
 }
